@@ -24,6 +24,12 @@ typedef struct	s_mlx
 	void		*win;
 }				t_mlx;
 
+typedef struct s_complex
+{
+	float	im;
+	float	re;
+}	t_complex;
+
 typedef struct s_options
 {
 	float	h_lo;
@@ -37,14 +43,9 @@ typedef struct s_options
 	t_mlx	*mlx;
 	int	shiftColor;
 	int	iterations;
+	t_complex	c;
 
 }	t_options;
-
-typedef struct s_complex
-{
-	float	im;
-	float	re;
-}	t_complex;
 
 t_complex	complex_mul(t_complex c, t_complex s)
 {
@@ -68,8 +69,26 @@ int mandelbrolt(t_complex c,t_options *options)
 {
 	int		iterations;
 	t_complex	z;
+	t_complex	z2;
 	z.im = 0;
 	z.re = 0;
+	z2.im = 0;
+	z2.re = 0;
+
+	iterations = options->iterations;
+	while(iterations && z.im * z.im + z.re * z.re <= 4)
+	{
+		z = complex_add(complex_add(complex_mul(z,z),c),z2);
+		iterations--;
+	}
+	return (iterations);
+}
+
+int julia(t_complex z,t_options *options)
+{
+	int		iterations;
+	t_complex	c;
+	c = options->c;
 
 	iterations = options->iterations;
 	while(iterations && z.im * z.im + z.re * z.re <= 4)
@@ -79,6 +98,7 @@ int mandelbrolt(t_complex c,t_options *options)
 	}
 	return (iterations);
 }
+
 void draw(t_options *options)
 {
 
@@ -159,37 +179,78 @@ int				key_press(int keycode, t_options *options)
 }
 int	mouse_action(int keycode,int x, int y, t_options *options)
 {
-	printf("key: %d %d\n",x, y);
+	t_complex	c;
+	printf("key: %d %d keycode: %d\n",x, y, keycode);
 	x-=400;
 	y-=400;
 	double	v_transaction;
 	double	h_transaction;
+	// zoom
+	if (keycode == 1)
+	{
+		v_transaction = (options->v_up - options->v_lo)/IMG_WIDTH;
+		h_transaction = (options->h_up - options->h_lo)/IMG_HEIGHT;
+		printf("up vlo %d %d \n",options->v_up ,options->v_lo);
+		c.im = x * v_transaction;
+		c.re = x * h_transaction;
+		options->c = c;
+		draw(options);
+	}
 	if (keycode == 5)
 	{
-		options->v_lo *= 1.2;
-		options->v_up *= 1.2;
-		options->h_lo *= 1.2;
-		options->h_up *= 1.2;
-		v_transaction = ((x * (double)(options->v_up - options->v_lo)/IMG_WIDTH))/1.2;
-		h_transaction = ((y * (double)(options->h_up - options->h_lo)/IMG_HEIGHT))/1.2;
-		options->v_lo += v_transaction;
+		v_transaction = (options->v_up - options->v_lo)/IMG_WIDTH;
+		h_transaction = (options->h_up - options->h_lo)/IMG_HEIGHT;
+		printf("up vlo %d %d \n",options->v_up ,options->v_lo);
+
+		options->v_lo += x * v_transaction;
+		options->v_up += x * v_transaction;
+		options->h_lo += y * h_transaction;
+		options->h_up += y * h_transaction;
+		printf("transaction old %d \n",options->v_up - options->v_lo);
+
+		v_transaction = (options->v_up - options->v_lo)*0.1;
+		h_transaction = (options->h_up - options->h_lo)*0.1;
+		options->v_lo -= v_transaction;
 		options->v_up += v_transaction;
-		options->h_lo += h_transaction;
+		options->h_lo -= h_transaction;
 		options->h_up += h_transaction;
+
+		v_transaction = (options->v_up - options->v_lo)/IMG_WIDTH;
+		h_transaction = (options->h_up - options->h_lo)/IMG_HEIGHT;
+		options->v_lo -= x * v_transaction;
+		options->v_up -= x * v_transaction;
+		options->h_lo -= y * h_transaction;
+		options->h_up -= y * h_transaction;
+		printf("transaction new %d \n",options->v_up - options->v_lo);
+
 		draw(options);
 	}
 	else if (keycode == 4)
 	{
-		options->v_lo /= 1.2;
-		options->v_up /= 1.2;
-		options->h_lo /= 1.2;
-		options->h_up /= 1.2;
-		v_transaction = ((x * (double)(options->v_up - options->v_lo)/IMG_WIDTH))*1.2;
-		h_transaction = ((y * (double)(options->h_up - options->h_lo)/IMG_HEIGHT))*1.2;
+
+		v_transaction = (options->v_up - options->v_lo)/IMG_WIDTH;
+		h_transaction = (options->h_up - options->h_lo)/IMG_HEIGHT;
+		
+		options->v_lo += x * v_transaction;
+		options->v_up += x * v_transaction;
+		options->h_lo += y * h_transaction;
+		options->h_up += y * h_transaction;
+
+		v_transaction = (options->v_up - options->v_lo)*0.1;
+		h_transaction = (options->h_up - options->h_lo)*0.1;
 		options->v_lo += v_transaction;
-		options->v_up += v_transaction;
+		options->v_up -= v_transaction;
 		options->h_lo += h_transaction;
-		options->h_up += h_transaction;
+		options->h_up -= h_transaction;
+
+		v_transaction = (options->v_up - options->v_lo)/IMG_WIDTH;
+		h_transaction = (options->h_up - options->h_lo)/IMG_HEIGHT;
+
+		options->v_lo -= x * v_transaction;
+		options->v_up -= x * v_transaction;
+		options->h_lo -= y * h_transaction;
+		options->h_up -= y * h_transaction;
+
 		draw(options);
 	}
 	return (0);
