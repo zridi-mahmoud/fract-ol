@@ -1,5 +1,6 @@
 #include"mlx.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 # define WIN_WIDTH 800
 # define WIN_HEIGHT 800
@@ -139,7 +140,7 @@ void draw(t_options *options)
 		while (++count_w < IMG_WIDTH)
 		{
 			c.re = options->v_lo + count_w * ((double)(options->v_up - options->v_lo)/IMG_WIDTH);
-			result = burning_ship(c, options);
+			result = julia(c, options);
 			if (result)
 			{
 				options->img->data[count_h * IMG_WIDTH + count_w] = ((result * (16777215/100))%777215)<<options->shiftColor;
@@ -199,13 +200,17 @@ int				key_press(int keycode, t_options *options)
 	}
 	else if (keycode == 53) 
 		exit(0);
-	printf("key: %d \n",keycode);
 	return (0);
 }
+
+int	close_program(int keycode, int x, int y, t_options *options)
+{
+	exit(0);
+}
+
 int	mouse_action(int keycode,int x, int y, t_options *options)
 {
 	t_complex	c;
-	printf("key: %d %d keycode: %d\n",x, y, keycode);
 	x-=400;
 	y-=400;
 	double	v_transaction;
@@ -215,7 +220,6 @@ int	mouse_action(int keycode,int x, int y, t_options *options)
 	{
 		v_transaction = (options->v_up - options->v_lo)/IMG_WIDTH;
 		h_transaction = (options->h_up - options->h_lo)/IMG_HEIGHT;
-		printf("up vlo %d %d \n",options->v_up ,options->v_lo);
 		c.im = x * v_transaction;
 		c.re = x * h_transaction;
 		options->c = c;
@@ -225,13 +229,11 @@ int	mouse_action(int keycode,int x, int y, t_options *options)
 	{
 		v_transaction = (options->v_up - options->v_lo)/IMG_WIDTH;
 		h_transaction = (options->h_up - options->h_lo)/IMG_HEIGHT;
-		printf("up vlo %d %d \n",options->v_up ,options->v_lo);
 
 		options->v_lo += x * v_transaction;
 		options->v_up += x * v_transaction;
 		options->h_lo += y * h_transaction;
 		options->h_up += y * h_transaction;
-		printf("transaction old %d \n",options->v_up - options->v_lo);
 
 		v_transaction = (options->v_up - options->v_lo)*0.1;
 		h_transaction = (options->h_up - options->h_lo)*0.1;
@@ -246,8 +248,6 @@ int	mouse_action(int keycode,int x, int y, t_options *options)
 		options->v_up -= x * v_transaction;
 		options->h_lo -= y * h_transaction;
 		options->h_up -= y * h_transaction;
-		printf("transaction new %d \n",options->v_up - options->v_lo);
-
 		draw(options);
 	}
 	else if (keycode == 4)
@@ -301,6 +301,7 @@ int	main(void)
 	draw(&options);
 	mlx_hook(mlx->win,2, 1L << 0,&key_press, &options);
 	mlx_hook(mlx->win,4, 1L << 0,&mouse_action, &options);
+	mlx_hook(mlx->win,17, 1L << 0,&close_program, &options);
 	mlx_loop(mlx->mlx_ptr);
 	return (0);
 }
