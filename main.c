@@ -84,6 +84,7 @@ int mandelbrolt(t_complex c,t_options *options)
 	return (iterations);
 }
 
+
 int julia(t_complex z,t_options *options)
 {
 	int		iterations;
@@ -94,6 +95,30 @@ int julia(t_complex z,t_options *options)
 	while(iterations && z.im * z.im + z.re * z.re <= 4)
 	{
 		z = complex_add(complex_mul(z,z),c);
+		iterations--;
+	}
+	return (iterations);
+}
+
+int burning_ship(t_complex c,t_options *options)
+{
+	int		iterations;
+	t_complex	z;
+	t_complex	z2;
+	z.im = 0;
+	z.re = 0;
+	z2.im = 0;
+	z2.re = 0;
+
+	iterations = options->iterations;
+	while(iterations && z.im * z.im + z.re * z.re <= 4)
+	{
+		z = complex_add(complex_add(complex_mul(z,z),c),z2);
+		if (z.im < 0)
+			z.im *= -1;
+		if (z.re < 0)
+			z.re *= -1;
+		
 		iterations--;
 	}
 	return (iterations);
@@ -114,7 +139,7 @@ void draw(t_options *options)
 		while (++count_w < IMG_WIDTH)
 		{
 			c.re = options->v_lo + count_w * ((double)(options->v_up - options->v_lo)/IMG_WIDTH);
-			result = mandelbrolt(c, options);
+			result = burning_ship(c, options);
 			if (result)
 			{
 				options->img->data[count_h * IMG_WIDTH + count_w] = ((result * (16777215/100))%777215)<<options->shiftColor;
@@ -255,8 +280,6 @@ int	mouse_action(int keycode,int x, int y, t_options *options)
 	}
 	return (0);
 }
-
-
 
 int	main(void)
 {
