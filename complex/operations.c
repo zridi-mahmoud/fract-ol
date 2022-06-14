@@ -1,4 +1,4 @@
-#include"../fractol.h"
+#include "fractol.h"
 
 t_complex	complex_mul(t_complex c, t_complex s)
 {

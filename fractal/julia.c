@@ -1,4 +1,4 @@
-#include"../fractol.h"
+#include "fractol.h"
 
 int julia(t_complex z,t_options *options)
 {

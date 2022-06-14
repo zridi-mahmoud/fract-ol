@@ -43,6 +43,8 @@ typedef struct s_options
 
 t_complex	complex_mul(t_complex c, t_complex s);
 t_complex	complex_add(t_complex c, t_complex s);
+int julia(t_complex z,t_options *options);
 int burning_ship(t_complex c,t_options *options);
+int mandelbrolt(t_complex c,t_options *options);
 
 #endif

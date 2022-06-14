@@ -1,4 +1,4 @@
-#include"../fractol.h"
+#include "fractol.h"
 
 int mandelbrolt(t_complex c,t_options *options)
 {
